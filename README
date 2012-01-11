@@ -1,8 +1,7 @@
 Based on the Django Locking plugin at stdbrouw/django-locking.  
-Forked to fix a number of issues and add in funcitonality to show and edit locks in list mode.
+Forked to fix a number of issues and add in functionality to show and edit locks in list mode.
 
 Installation through Pip (pip install django-locking)
-subm branch provides git submodule format but is not supported.
 
 Configuration:
 
@@ -27,25 +26,26 @@ class Media:
     )
   )
 
-4) To use the list display icon, add the "get_lock_for_admin" method to the list display in the app admin file.  
+4) To use the list display icon, add the "get_lock_for_admin" method to the list display in the admin class for the app. Also, so the changelist view has access to the request object, it has to be explicitly passed:
 
-class ModelAdmin(admin.ModelAdmin):
-    
-    get_lock_for_admin = locking_admin.get_lock_for_admin
-
-    list_display = [field1, field2, ..., 'get_lock_for_admin']
-
-5) So the changelist view has access to the request object, it has to be explicitly passed:
-
-    def changelist_view(self, request, extra_context=None):
-        '''
-        We need the request objects in a few places where it's usually not present,
-        so we are adding it to ModelAdmin object
-        '''
-        self.request = request
-        return super(ModelAdmin, self).changelist_view(request, extra_context)
+	from locking import admin as locking_admin
+	
+	class ModelAdmin(admin.ModelAdmin):
+		
+		get_lock_for_admin = locking_admin.get_lock_for_admin
+	
+		list_display = [field1, field2, ..., 'get_lock_for_admin']
+		
+	    def changelist_view(self, request, extra_context=None):
+			'''
+			We need the request objects in a few places where it's usually not present,
+			so we are adding it to ModelAdmin object
+			'''
+			self.request = request
+			return super(ModelAdmin, self).changelist_view(request, extra_context)
 
 
 5) Run syncdb for an initial project or create a migration with south to build the database tables
+
   manage.py schemamigration locking --auto
   manage.py migrate locking
