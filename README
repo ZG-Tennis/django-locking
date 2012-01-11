@@ -27,27 +27,25 @@ class Media:
     )
   )
 
-4) Also add this to the admin file. The changelist_view allows get_lock_for_admin access to the request object.
-    from locking import admin as locking_admin
+4) To use the list display icon, add the "get_lock_for_admin" method to the list display in the app admin file.  
 
-    # In your ModelAdmin class
+class ModelAdmin(admin.ModelAdmin):
+    
     get_lock_for_admin = locking_admin.get_lock_for_admin
+
+    list_display = [field1, field2, ..., 'get_lock_for_admin']
+
+5) So the changelist view has access to the request object, it has to be explicitly passed:
 
     def changelist_view(self, request, extra_context=None):
         '''
         We need the request objects in a few places where it's usually not present,
-        so we are adding it to PostAdmin object
+        so we are adding it to ModelAdmin object
         '''
         self.request = request
-        return super(PostAdmin, self).changelist_view(request, extra_context)
+        return super(ModelAdmin, self).changelist_view(request, extra_context)
+
 
 5) Run syncdb for an initial project or create a migration with south to build the database tables
   manage.py schemamigration locking --auto
   manage.py migrate locking
-
-6) To use the list display icon, add the "get_lock_for_admin" method to the list display in the app admin file like so:
-
-from locking.admin import get_lock_for_admin
-
-class AppAdmin(admin.ModelAdmin):
-  list_display = [..., "get_lock_for_admin"]
